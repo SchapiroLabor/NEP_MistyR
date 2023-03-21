@@ -1,4 +1,4 @@
-### Run Misty from github
+### Run Misty from github Fig2
 # https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R
 
 library(mistyR)
@@ -11,8 +11,7 @@ library(cowplot)
 
 # Run MISTy
 in_dir = "./../../../../data"
-out_dir = "./../output"
-fig_dir = "./../images"
+out_dir = "./../../output/"
 
 
 data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
@@ -20,6 +19,7 @@ data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
 #data <- list.files("data/insilico/structure", "tissue.*\\.csv", full.names = TRUE)
 plan(multisession)
 
+# set juxta view parameter, indicating distance in which neighbors are still seen as neighbors
 l <- 30
 
 data = data %>% walk(\(path){
@@ -38,11 +38,15 @@ data = data %>% walk(\(path){
     add_juxtaview(pos, neighbor.thr = l, prefix = "juxta_")
   
   run_misty(ctype.views, bypass.intra = TRUE,
-            results.folder = paste0("results/structure/ctype/tissue", 
+            results.folder = paste0(out_dir, 
                                     basename(path)
                                     #str_extract(path, "\\d")
-                                    ))
+            ))
 })
+
+# only ran til here as results I am using are currently importances, rest would be the script indicated above
+
+##########################
 
 tissues <- data %>% map_dfr(~ 
                               read_csv(.x) %>% 
