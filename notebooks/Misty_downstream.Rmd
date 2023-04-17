@@ -60,7 +60,9 @@ library(ggplot2)
 library(pheatmap)
 
 rownames(try) = try$sample
-pheatmap(try[,-1], treeheight_row = 50, treeheight_col = 1)
+png(file=paste0(csv_dir,"Misty_heatmap.png"), res = 100)
+pheatmap(try[,-1], treeheight_row = 0, treeheight_col = 0)
+dev.off()
 ```
 
 

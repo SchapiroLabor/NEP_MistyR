@@ -10,7 +10,7 @@ library(cowplot)
 
 
 # Run MISTy
-in_dir = "./../../../../data"
+in_dir = "./../../../../data/Sim_100_equal4"
 out_dir = "./../../output/"
 
 
@@ -44,126 +44,43 @@ data = data %>% walk(\(path){
             ))
 })
 
-# only ran til here as results I am using are currently importances, rest would be the script indicated above
+###
 
-##########################
+#create standard comparison matrix
+csv_dir <- "./../../output/"
 
-tissues <- data %>% map_dfr(~ 
-                              read_csv(.x) %>% 
-                              mutate(ct = as.factor(ct + 1), 
-                                     tissue=paste("Tissue", str_extract(.x, "\\d")))
-)
+# Recursively list all .csv files in the directory and its subdirectories
+data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.30.txt$")
 
-unique(tissues$tissue)
+all = list()
 
-f2a <- ggplot(tissues, aes(x,y, fill = ct )) + 
-  geom_voronoi() + xlim(0,1000) + ylim(0,1000) + 
-  coord_fixed() +
-  facet_wrap(vars(tissue)) +
-  theme_classic()
+for (i in data){
+  all[[i]] <- read_csv(paste0(csv_dir,i))
+}
 
-variances <- paste0("tissue", seq_len(3)) %>% map_dfr(\(n){
-  results  <- collect_results(paste0("results/structure/ctype/", n))
-  results$improvements %>% filter(measure == "gain.R2") %>%
-    select(target, value) %>%
-    mutate(sample = n, target = paste0("ct",str_extract(target, "\\d") %>% as.numeric() + 1))
-})
+tab = data.frame(target = character(),
+                 imp = double(),
+                 label1 = character(),
+                 sample = character())
 
-f2b <- ggplot(variances, aes(x = sample, y = value, color = target)) + 
-  geom_point() + 
-  ylab("Variance explained") + 
-  xlab("") +
-  coord_fixed(ratio = 0.3) +
-  theme_classic()
+names = unique(sub("/.*", "", data))
+subnames = unique(sub("^.*/", "", data))
+for (i in names){
+  for (x in subnames){
+    dat = all[[paste(i, x, sep = "/")]]
+    dat$label1 = rep(str_extract(x, "ct\\d+"), times= length(nrow(dat)))
+    dat$sample = rep(i, times= length(nrow(dat)))
+    tab = rbind(tab, dat)
+  }
+}
 
+# create labels for interactinos
+tab$interaction =  paste(tab$target, tab$label1, sep = "_")
+tab = tab %>% select(-target, -label1)
 
-tissue2.results <- collect_results("results/structure/ctype/tissue2/")
-tissue2.results %<>% map(~ .x %>% mutate(across(
-  matches("([tT]arget|Predictor)"),
-  \(x) str_replace_all(x, "\\d", \(match) as.numeric(match) + 1)) 
-))
+try = as.data.frame(spread(tab, key = interaction, value = imp))
+rownames(try) = try$sample
+try = try[,-1]
 
-tissue2.results %>% plot_interaction_heatmap("juxta.15", cutoff = 0.5, trim = 5)
-f2c1 <- last_plot() + ggtitle("Tissue 2 celltype juxtaview")
+write.csv(data,"./../../../Comparison/results/Misty_juxta30_sim100_equal4.csv")
 
-tissue3.results <- collect_results("results/structure/ctype/tissue3/")
-tissue3.results %<>% map(~ .x %>% mutate(across(
-  matches("([tT]arget|Predictor)"),
-  \(x) str_replace_all(x, "\\d", \(match) as.numeric(match) + 1)) 
-))
-
-tissue3.results %>% plot_interaction_heatmap("juxta.15", cutoff = 0.5, trim = 5)
-f2c2 <- last_plot() + ggtitle("Tissue 3 celltype juxtaview")
-
-tissue3.results.expr <- collect_results("results/structure/expression/tissue3")
-
-tissue3.results.expr %>% plot_interaction_heatmap("juxta.15", clean = TRUE, 
-                                                  cutoff = 2, trim = 4)
-f2d <- last_plot() + ggtitle("Tissue 3 expression juxtaview")
-
-# Predictor topmarker importances
-
-tissue3 <- read.csv(data[3])
-
-ct0.expr <- tissue3 %>% filter(cell_type == 0) %>% select(-seq_len(5)) %>% colMeans
-non.ct0.expr <- tissue3 %>% filter(cell_type != 0) %>% select(-seq_len(5)) %>% colMeans
-ct0.markers <- ct0.expr - non.ct0.expr
-
-ct1.expr <- tissue3 %>% filter(cell_type == 1) %>% select(-seq_len(5)) %>% colMeans
-non.ct1.expr <- tissue3 %>% filter(cell_type != 1) %>% select(-seq_len(5)) %>% colMeans
-ct1.markers <- ct1.expr - non.ct1.expr
-
-
-ct2.expr <- tissue3 %>% filter(cell_type == 2) %>% select(-seq_len(5)) %>% colMeans
-non.ct2.expr <- tissue3 %>% filter(cell_type != 2) %>% select(-seq_len(5)) %>% colMeans
-ct2.markers <- ct2.expr - non.ct2.expr
-
-ct3.expr <- tissue3 %>% filter(cell_type == 3) %>% select(-seq_len(5)) %>% colMeans
-non.ct3.expr <- tissue3 %>% filter(cell_type != 3) %>% select(-seq_len(5)) %>% colMeans
-ct3.markers <- ct3.expr - non.ct3.expr
-
-topn <- 10
-
-top0 <- names(sort(abs(ct0.markers), decreasing = TRUE))[1:topn]
-top1 <- names(sort(abs(ct1.markers), decreasing = TRUE))[1:topn]
-top2 <- names(sort(abs(ct2.markers), decreasing = TRUE))[1:topn]
-top3 <- names(sort(abs(ct3.markers), decreasing = TRUE))[1:topn]
-
-markers <- data.frame(cell_type = paste0("ct", rep(seq(4)-1, 10)) %>% sort(), marker = c(top0, top1, top2, top3))
-
-
-cts <- c("ct0", "ct2")
-
-importances <- expand_grid(cts, markers %>% pull(cell_type) %>% unique()) %>% pmap_dfr(~
-                                                                                         data.frame(Target = ..1, Predictor = ..2, Importance = tissue3.results.expr$importances.aggregated %>%
-                                                                                                      filter(
-                                                                                                        Target %in% (markers %>% filter(cell_type == ..1) %>% pull(marker) %>% 
-                                                                                                                       intersect(tissue3.results.expr$improvements.stats %>% 
-                                                                                                                                   filter(measure == "gain.R2", mean >= 4) %>% 
-                                                                                                                                   pull(target))),
-                                                                                                        Predictor %in% (markers %>% filter(cell_type == ..2) %>% pull(marker))
-                                                                                                      ) %>%
-                                                                                                      pull(Importance)) %>% drop_na()) %>% mutate(across(
-                                                                                                        matches("(Target|Predictor)"),
-                                                                                                        \(x) str_replace_all(x, "\\d", \(match) as.numeric(match) + 1)) 
-                                                                                                      )
-
-
-
-f2e <- ggplot(importances, aes(x = Predictor, y = Importance, fill = Predictor)) + 
-  geom_violin(scale = "width", draw_quantiles = c(0.25, 0.5, 0.75)) + 
-  geom_hline(yintercept = 0, col = "gray30", linetype = "dotted") +
-  facet_wrap(vars(Target), ncol = 1) + theme_classic() +
-  theme(legend.position = "none")
-
-
-pdf("plots/structure/Figure2.pdf", width = 12, height = 14)
-plot_grid(
-  plot_grid(
-    f2a, f2b, nrow = 1, rel_widths = c(1.75,1), labels = c("A","B")
-  ),
-  plot_grid(plot_grid(f2c1, f2c2, ncol = 1), f2d, f2e, nrow = 1, rel_widths = c(0.8,1,0.8), labels = c("C", "D", "E")),
-  ncol = 1,
-  rel_heights = c(1, 1.8)
-)
-dev.off()
