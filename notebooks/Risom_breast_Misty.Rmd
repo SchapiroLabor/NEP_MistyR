@@ -1,0 +1,229 @@
+---
+title: "RIsom_breast_Misty"
+author: "Chiara Schiller"
+date: "2023-05-16"
+output: html_document
+---
+Load in data and create list out of it
+
+Load packages
+```{r}
+library(readr)
+library(tidyverse)
+library(deldir)
+library(parallel)
+library(doParallel)
+```
+
+Load in data
+```{r}
+data = read_csv("./../../../../data/Risom_breast/Single_Cell_Data.csv")
+```
+# exclude normal and look at ct distribution between progressor and non-progressor
+
+```{r}
+meta = read_csv("./../../../../data/Risom_breast/Table_S1_Patient_Feature_Table.csv")
+meta = meta %>% rename("Point_Num" = "PointNumber")
+data = left_join(data, meta, by = "Point_Num")
+
+```
+Get x and y coordinates of label or event
+```{r}
+library(purrr)
+
+# Set directory where CSV files are located
+csv_dir <- "./../../../../data/Risom_breast/Segmetation_Outlines_and_Labels_Mendeley/"
+
+# Get file names of all CSV files in directory
+csv_files <- list.files(csv_dir, pattern = "\\.csv$", full.names = TRUE)
+names <- list.files(csv_dir, pattern = "\\.csv$", full.names = FALSE)
+names = sub(".csv", "", names)
+
+# Read in all CSV files and store in a list
+csv_list <- map(csv_files, read.csv)
+names(csv_list) = names
+
+for (i in seq_along(csv_list)) {
+  csv_list[[i]]$Point_Num <- as.numeric(rep(names(csv_list)[i], nrow(csv_list[[i]])))
+}
+```
+
+
+Check if left_join works
+```{r}
+#data_df <- do.call(rbind, csv_list)
+#data = left_join(data, data_df, by = c("label", "Point_Num"))
+meta = read_csv("./../../../../data/Risom_breast/Table_S1_Patient_Feature_Table.csv")
+meta = meta %>% rename("Point_Num" = "PointNumber")
+
+DCIS_pat = meta %>% 
+  filter(LDA_Type == "DCIS")
+
+DCIS_pat = DCIS_pat$Point_Num
+
+# or rather join big datasets to list
+pheno = data %>% 
+  filter(Point_Num %in% DCIS_pat) %>%
+  select(Point_Num, phenotype, label) # or phenotype instead of celllineage
+
+join_df <- function(df) {
+  left_join(df, pheno, by = c("Point_Num", "label"))
+}
+
+colname_set <- function(df) {
+  colnames(df) = c("cell_ID", "x", "y", "sample", "ct")
+}
+
+# Apply the join_df function to each element of the list using lapply
+list_joined <- lapply(csv_list, join_df)
+
+for (i in 1:length(list_joined)){
+  colnames(list_joined[[i]]) = c("cell_ID", "x", "y", "sample", "ct")
+  
+}
+
+# filter list for only progressors and nonprogressors
+list_joined <- list_joined[as.character(DCIS_pat)]
+
+#saveRDS(list_joined, "./../../../../data/Risom_breast/DCIS_Risom_list.rds")
+
+list_joined = readRDS("./../../../../data/Risom_breast/DCIS_Risom_list.rds")
+```
+
+
+
+Run Misty on data
+```{r}
+### Run Misty from github Fig2
+# https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R
+
+library(mistyR)
+library(tidyverse)
+library(magrittr)
+library(future)
+library(ggvoronoi)
+library(cowplot)
+
+
+data = list_joined
+
+for (i in seq_along(list_joined)) {
+  df <- list_joined[[i]]
+  df = df %>% select(!sample)
+  filename <- paste0("Risom_data_", names(list_joined)[i], ".csv")
+  write.csv(df, file = paste0("./../../../../data/Risom_breast/files_misty/", filename), row.names = TRUE)
+}
+```
+
+
+```{r}
+# Run MISTy
+in_dir = "./../../../../data/Risom_breast/files_misty"
+out_dir = "./../../output/Risom_breast/"
+
+
+data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
+
+#data <- list.files("data/insilico/structure", "tissue.*\\.csv", full.names = TRUE)
+plan(multisession)
+
+# set juxta view parameter, indicating distance in which neighbors are still seen as neighbors
+l <- 50
+p1 = 50
+p2 = 100
+
+
+data = data %>% walk(\(path){
+  all <- read_csv(path)
+  all$cell_id = paste0(rownames(all), basename(data))
+  all$tissue_id = rep(basename(path), length(all$cell_id))
+  pos <- all %>% select(x, y)
+  
+  ctype <- all %>% select(cell_id, ct) %>% mutate(value = 1) %>%
+    group_by(cell_id) %>%
+    pivot_wider(names_from = "ct", names_prefix = "ct", values_from = "value") %>%
+    ungroup() %>%
+    select(-cell_id) %>% replace(is.na(.),0)
+  
+  ctype.views <- create_initial_view(ctype) %>%
+    add_juxtaview(pos, neighbor.thr = l, prefix = "juxta_") %>%
+    add_paraview(pos, l = p1, prefix = "para1_") %>%
+    add_paraview(pos, l = p2, prefix = "para2_")
+  
+  run_misty(ctype.views, bypass.intra = TRUE,
+            results.folder = paste0(out_dir, 
+                                    basename(path)
+                                    #str_extract(path, "\\d")
+            ))
+})
+
+
+###
+
+#create standard comparison matrix
+csv_dir <- "./../../output/Risom_breast/"
+
+# Recursively list all .csv files in the directory and its subdirectories
+
+#data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.30.txt$")
+
+data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.50.txt$")
+
+all = list()
+
+for (i in data){
+  all[[i]] <- read_csv(paste0(csv_dir,i))
+}
+
+tab = data.frame(target = character(),
+                 imp = double(),
+                 label1 = character(),
+                 sample = character())
+
+names = unique(sub("/.*", "", data))
+subnames = unique(sub("^.*/", "", data))
+for (i in names){
+  for (x in subnames){
+    dat = all[[paste(i, x, sep = "/")]]
+    dat$label1 = rep(str_extract(x, "ct\\d+"), times= length(nrow(dat)))
+    dat$sample = rep(i, times= length(nrow(dat)))
+    tab = rbind(tab, dat)
+  }
+}
+
+# create labels for interactinos
+tab$interaction =  paste(tab$target, tab$label1, sep = "_")
+tab = tab %>% select(-target, -label1)
+tab$sample = sub("Risom_data_", "", tab$sample)
+
+try = as.data.frame(spread(tab, key = interaction, value = imp))
+rownames(try) = try$sample
+try = try[,-1]
+
+write.csv(try,"./../../../Comparison/results_4ct_self/Misty_juxta_delaunay_4ct_self.csv")
+
+sessionInfo()
+
+
+```
+Plot results in a Misty way
+
+```{r}
+out_dir = "./../../output/Risom_breast"
+data = out_dir %>% list.files(full.names = TRUE)
+
+misty.results = collect_results(data)
+misty.results %>% ?plot_view_contributions()
+```
+Plotting
+```{r}
+misty.results %>% plot_view_contributions()
+```
+
+Relations that can explain contributors
+```{r}
+misty.results %>% plot_interaction_heatmap(view = "juxta.50", cutoff = 0.5)
+misty.results %>% plot_interaction_heatmap(view = "para.50", cutoff = 0.5)
+misty.results %>% plot_interaction_heatmap(view = "para.100", cutoff = 0.5)
+```
+

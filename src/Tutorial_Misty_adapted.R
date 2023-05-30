@@ -10,8 +10,8 @@ library(cowplot)
 
 
 # Run MISTy
-in_dir = "./../../../../data/Sim_100_equal4"
-out_dir = "./../../output/"
+in_dir = "./../../../../data/Sim_100_asym_01/"
+out_dir = "./../../output/4ct_delaunay_cross01/"
 
 
 data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
@@ -20,7 +20,7 @@ data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
 plan(multisession)
 
 # set juxta view parameter, indicating distance in which neighbors are still seen as neighbors
-l <- 30
+l <- 50
 
 data = data %>% walk(\(path){
   all <- read_csv(path)
@@ -47,10 +47,13 @@ data = data %>% walk(\(path){
 ###
 
 #create standard comparison matrix
-csv_dir <- "./../../output/"
+csv_dir <- "./../../output/4ct_delaunay_cross01/"
 
 # Recursively list all .csv files in the directory and its subdirectories
-data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.30.txt$")
+
+#data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.30.txt$")
+
+data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.50.txt$")
 
 all = list()
 
@@ -77,10 +80,16 @@ for (i in names){
 # create labels for interactinos
 tab$interaction =  paste(tab$target, tab$label1, sep = "_")
 tab = tab %>% select(-target, -label1)
+tab$sample = sub("4ct_self_delaunay", "", tab$sample)
 
 try = as.data.frame(spread(tab, key = interaction, value = imp))
 rownames(try) = try$sample
 try = try[,-1]
 
-write.csv(data,"./../../../Comparison/results/Misty_juxta30_sim100_equal4.csv")
+write.csv(try,"./../../../Comparison/results_4ct_cross01/Misty_juxta50_delaunay_4ct_cross01.csv")
+
+sessionInfo()
+
+library(pheatmap)
+pheatmap(try)
 
