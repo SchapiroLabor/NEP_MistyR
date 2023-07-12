@@ -4,7 +4,7 @@ author: "Chiara Schiller"
 date: "2023-05-16"
 output: html_document
 ---
-Load in data and create list out of it
+Run MISTy on Risom_breast dataset from https://data.mendeley.com/datasets/d87vg86zd8/3
 
 Load packages
 ```{r}
@@ -13,13 +13,20 @@ library(tidyverse)
 library(deldir)
 library(parallel)
 library(doParallel)
+library(mistyR)
+library(magrittr)
+library(future)
+library(ggvoronoi)
+library(cowplot)
 ```
 
 Load in data
 ```{r}
 data = read_csv("./../../../../data/Risom_breast/Single_Cell_Data.csv")
 ```
-# exclude normal and look at ct distribution between progressor and non-progressor
+### Pre-processing
+
+exclude normal and look at ct distribution between progressor and non-progressor
 
 ```{r}
 meta = read_csv("./../../../../data/Risom_breast/Table_S1_Patient_Feature_Table.csv")
@@ -48,8 +55,7 @@ for (i in seq_along(csv_list)) {
 }
 ```
 
-
-Check if left_join works
+join metadata
 ```{r}
 #data_df <- do.call(rbind, csv_list)
 #data = left_join(data, data_df, by = c("label", "Point_Num"))
@@ -89,21 +95,12 @@ list_joined <- list_joined[as.character(DCIS_pat)]
 
 list_joined = readRDS("./../../../../data/Risom_breast/DCIS_Risom_list.rds")
 ```
-
-
+###MISTy
 
 Run Misty on data
 ```{r}
 ### Run Misty from github Fig2
 # https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R
-
-library(mistyR)
-library(tidyverse)
-library(magrittr)
-library(future)
-library(ggvoronoi)
-library(cowplot)
-
 
 data = list_joined
 

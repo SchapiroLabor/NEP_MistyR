@@ -7,11 +7,13 @@ library(magrittr)
 library(future)
 library(ggvoronoi)
 library(cowplot)
+library(pheatmap)
 
+# Run MISTy on simulated samples to downstream extract importance value per sample
 
 # Run MISTy
-in_dir = "./../../../../data/Sim_100_asym_01/"
-out_dir = "./../../output/4ct_delaunay_cross01/"
+in_dir = "./../../../../data/Sim_nbh15_asym01_1000_grid0.2_1kiter_025kswap/"
+out_dir = "./../../output/4ct_check_asym/"
 
 
 data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
@@ -20,7 +22,7 @@ data = in_dir %>% list.files(full.names = TRUE, pattern = ".csv")
 plan(multisession)
 
 # set juxta view parameter, indicating distance in which neighbors are still seen as neighbors
-l <- 50
+l <- 30
 
 data = data %>% walk(\(path){
   all <- read_csv(path)
@@ -47,19 +49,21 @@ data = data %>% walk(\(path){
 ###
 
 #create standard comparison matrix
-csv_dir <- "./../../output/4ct_delaunay_cross01/"
+csv_dir <- "./../../output/4ct_check_asym/"
 
 # Recursively list all .csv files in the directory and its subdirectories
 
 #data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.30.txt$")
 
-data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.50.txt$")
+data <- list.files(path = csv_dir, recursive = TRUE, pattern = "\\juxta.30.txt$")
 
 all = list()
 
 for (i in data){
   all[[i]] <- read_csv(paste0(csv_dir,i))
 }
+
+#all[[1000]]
 
 tab = data.frame(target = character(),
                  imp = double(),
@@ -76,7 +80,7 @@ for (i in names){
     tab = rbind(tab, dat)
   }
 }
-
+back = tab
 # create labels for interactinos
 tab$interaction =  paste(tab$target, tab$label1, sep = "_")
 tab = tab %>% select(-target, -label1)
@@ -86,10 +90,16 @@ try = as.data.frame(spread(tab, key = interaction, value = imp))
 rownames(try) = try$sample
 try = try[,-1]
 
-write.csv(try,"./../../../Comparison/results_4ct_cross01/Misty_juxta50_delaunay_4ct_cross01.csv")
+#save table
+
+write.csv(try,"./../../../Comparison/results_4ct_asym_0.2grid_self/MistyCheck_juxta30_delaunay_4ct_cross01.csv")
+
+# Look at heatmap
+pheatmap(try)
+colnames(try) = sub("juxta_", "", colnames(try))
+colnames(try) = sub("ct", "", colnames(try))
+
+pheatmap(try, treeheight_row = 0, treeheight_col = 0, show_rownames = FALSE)
 
 sessionInfo()
-
-library(pheatmap)
-pheatmap(try)
 
