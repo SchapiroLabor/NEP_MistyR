@@ -2,7 +2,7 @@
 
 Paper: https://doi.org/10.1186/s13059-022-02663-5
 
-The method Multiview Intercellular SpaTial modeling framework (MISTy) is an explainable machine learning framework for knowledge extraction and analysis of single-cell, highly multiplexed, spatially resolved data. The flexible framework allows the creation of different views, an intra-, juxta- and paraview, and analyses the relationships between the views. In our case, we look at the immediate neighborhood of cells and are interested in the juxtaview. Within the juxtaview, we can analyse which close cells can be used as predictors for other cells, so cell-cell interactions in terms of proximities. This task does not leverage the whole potential of the framework.
+The method Multiview Intercellular SpaTial modeling framework (MISTy) is an explainable machine learning framework for knowledge extraction and analysis of single-cell, highly multiplexed, spatially resolved data. The flexible framework allows the creation of different views, an intra-, juxta-, and paraview, and analyses the relationships between the views. In our case, we look at the immediate neighborhood of cells and are interested in the juxtaview. Within the juxtaview, we can analyse which close cells can be used as predictors for other cells, so cell-cell interactions in terms of proximities. This task does not leverage the whole potential of the framework.
 
 
 # Usage
@@ -17,10 +17,10 @@ MistyR can be installed with `BiocManager::install("mistyR")` (v 1.6.1). Other d
 
 ## Data
 
-Simulated data with x, y and ct annotation column is used. The script src/Tutorial_Misty_adapted.R uses a relative input datapath to a data folder 2 levels above the cloned github repo. The oupur files are stored in a form you created output folder on the same level, as the cloned github repo. The downstream notebook creates an initial heatmap visualization of the results and takes the stored output from the initial script as input.
+Simulated data with x, y, and ct annotation columns is used. The script src/Tutorial_Misty_adapted.R uses a relative input datapath to a data folder 2 levels above the cloned GitHub repo. The output files are stored in a form you created output folder on the same level as the cloned GitHub repo. The downstream notebook creates an initial heatmap visualization of the results and takes the stored output from the initial script as input.
 
 ## Scripts
 
-/src: The script Tutorial_Misty_adapted.R Is used for analysis of the juxtaview for cell types. The script Misty_ct_Miguel.R was used by Miguel and adapted to my data, but is not creating values for auto-importances of cell types.
+/src: The script Tutorial_Misty_adapted.R Is used for the analysis of the just view for cell types. The script Misty_ct_Miguel.R was used by Miguel and adapted to my data, but is not creating values for auto-importances of cell types.
 
-/notebooks: Misty_SCNA_downstream.Rmd: Initial heatmap visualization of Misty results
+/notebooks: Misty_SCNA_downstream.Rmd: Initial heatmap visualization of Misty's results
