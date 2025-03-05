@@ -1,9 +1,8 @@
-# Misty_SCNA
+# NEP_MistyR
 
 Paper: https://doi.org/10.1186/s13059-022-02663-5
 
 The method Multiview Intercellular SpaTial modeling framework (MISTy) is an explainable machine learning framework for knowledge extraction and analysis of single-cell, highly multiplexed, spatially resolved data. The flexible framework allows the creation of different views, an intra-, juxta-, and paraview, and analyses the relationships between the views. In our case, we look at the immediate neighborhood of cells and are interested in the juxtaview. Within the juxtaview, we can analyse which close cells can be used as predictors for other cells, so cell-cell interactions in terms of proximities. This task does not leverage the whole potential of the framework.
-
 
 # Usage
 
@@ -13,7 +12,25 @@ The script src/Tutorial_Misty_adapted.R is adapted from the script the authors o
 
 ## Installation
 
-MistyR can be installed with `BiocManager::install("mistyR")` (v 1.6.1). Other dependencies are pheatmap_1.0.12, cowplot_1.1.1, ggvoronoi_0.8.5, magrittr_2.0.3 , forcats_1.0.0, stringr_1.5.0, readr_2.1.3, tidyr_1.3.0, tibble_3.1.8, ggplot2_3.4.0, tidyverse_1.3.2, distances_0.1.9, purrr_1.0.1, dplyr_1.1.0 and future_1.31.0.
+MistyR can be installed with: 
+- `BiocManager::install("mistyR")` (v 1.6.1)
+
+Other dependencies are 
+- pheatmap_1.0.12 
+- cowplot_1.1.1 
+- ggvoronoi_0.8.5
+- magrittr_2.0.3
+- forcats_1.0.0
+- stringr_1.5.0
+- readr_2.1.3
+- tidyr_1.3.0
+- tibble_3.1.8
+- ggplot2_3.4.0
+- tidyverse_1.3.2
+- distances_0.1.9
+- purrr_1.0.1
+- dplyr_1.1.0
+- future_1.31.0
 
 ## Data
 
@@ -21,6 +38,16 @@ Simulated data with x, y, and ct annotation columns is used. The script src/Tuto
 
 ## Scripts
 
+<<<<<<< HEAD
+`/src`:
+- `/misty_mi_knn5.R`: This script runs mistyR on the simulated data with a neighborhood definition of KNN=5.
+- `/misty_simulated_delaunay.R`: This script runs mistyR on the MI data using a Delaunay triangulation a neighborhood definition.
+
+`/notebooks`:
+- `/MI_ohe_conversion.ipynb`: This notebook converts MI data to one-hot encoding for MistyR.
+- `/simmulated_ohe_conversion.ipynb`: This notebook converts the simulated data to one-hot encoding for MistyR. 
+=======
 /src: The script Tutorial_Misty_adapted.R Is used for the analysis of the just view for cell types. The script Misty_ct_Miguel.R was used by Miguel and adapted to my data, but is not creating values for auto-importances of cell types.
 
 /notebooks: Misty_SCNA_downstream.Rmd: Initial heatmap visualization of Misty's results
+>>>>>>> origin/main
