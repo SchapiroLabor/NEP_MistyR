@@ -41,6 +41,8 @@ Simulated data with x, y, and ct annotation columns is used. The script src/Tuto
 `/src`:
 - `/misty_mi_knn5.R`: This script runs mistyR on the simulated data with a neighborhood definition of KNN=5.
 - `/misty_simulated_delaunay.R`: This script runs mistyR on the MI data using a Delaunay triangulation a neighborhood definition.
+- `/reshape_misty_output_mi_knn5.R`: This script takes the output files from `/misty_mi_knn5.R` and reformats them into a NEP pair x sample data frame for further comparison.
+- `/reshape_misty_output_simulated_delaunay.R`: This script takes the output files from `/misty_simulated_delaunay.R` and reformats them into a NEP pair x sample data frame for further comparison.
 
 `/notebooks`:
 - `/MI_ohe_conversion.ipynb`: This notebook converts MI data to one-hot encoding for MistyR.
