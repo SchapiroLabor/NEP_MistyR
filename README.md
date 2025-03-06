@@ -8,7 +8,7 @@ Multiview Intercellular SpaTial modeling framework (MISTy) is an explainable mac
 
 ## Source
 
-The script src/Tutorial_Misty_adapted.R is adapted from the script the authors of MistyR used to create their figures (https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R). As indicated in the script, only the first code chunk is used for analysis.
+The script src/Tutorial_Misty_adapted.R is adapted from the script the authors of MistyR used to create their figures (https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R). As indicated in the script, only the first code chunk is used for analysis. The output of the NEP analysis were further compared to other methods in https://github.com/SchapiroLabor/NEP_comparison
 
 ## Installation
 
@@ -34,7 +34,12 @@ Other dependencies are
 
 ## Data
 
-Simulated data with x, y, and ct annotation columns is used. The script src/Tutorial_Misty_adapted.R uses a relative input datapath to a data folder 2 levels above the cloned GitHub repo. The output files are stored in a form you created output folder on the same level as the cloned GitHub repo. The downstream notebook creates an initial heatmap visualization of the results and takes the stored output from the initial script as input.
+### In silico tissue (IST) data
+Simulated .csv data with x, y, and ct annotation columns were used. The asymmetric and symmetric in silico tissue (IST) datasets were generated as described here: https://github.com/SchapiroLabor/NEP_IST_generation. 
+
+### Myocardial infarction (MI) data
+
+UPDATE PATH
 
 ## Scripts
 
