@@ -2,13 +2,13 @@
 
 Paper: https://doi.org/10.1186/s13059-022-02663-5
 
-The method Multiview Intercellular SpaTial modeling framework (MISTy) is an explainable machine learning framework for knowledge extraction and analysis of single-cell, highly multiplexed, spatially resolved data. The flexible framework allows the creation of different views, an intra-, juxta-, and paraview, and analyses the relationships between the views. In our case, we look at the immediate neighborhood of cells and are interested in the juxtaview. Within the juxtaview, we can analyse which close cells can be used as predictors for other cells, so cell-cell interactions in terms of proximities. This task does not leverage the whole potential of the framework.
+Multiview Intercellular SpaTial modeling framework (MISTy) is an explainable machine learning framework for knowledge extraction and analysis of single-cell, highly multiplexed, spatially resolved data. The flexible framework allows the creation of different views, an intra-, juxta-, and paraview, and analyses the relationships between the views. In our case, we look at the immediate neighborhood of cells and are interested in the juxtaview. Within the juxtaview, we can analyse which close cells can be used as predictors for other cells, so cell-cell interactions in terms of proximities. This task does not leverage the whole potential of the framework.
 
 # Usage
 
 ## Source
 
-The script src/Tutorial_Misty_adapted.R is adapted from the script the authors of MistyR were using to create their figures (https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R). Only the first code chunk is used for analysis, as indicated in the script.
+The script src/Tutorial_Misty_adapted.R is adapted from the script the authors of MistyR used to create their figures (https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R). As indicated in the script, only the first code chunk is used for analysis.
 
 ## Installation
 
@@ -38,16 +38,11 @@ Simulated data with x, y, and ct annotation columns is used. The script src/Tuto
 
 ## Scripts
 
-<<<<<<< HEAD
 `/src`:
 - `/misty_mi_knn5.R`: This script runs mistyR on the simulated data with a neighborhood definition of KNN=5.
 - `/misty_simulated_delaunay.R`: This script runs mistyR on the MI data using a Delaunay triangulation a neighborhood definition.
 
 `/notebooks`:
 - `/MI_ohe_conversion.ipynb`: This notebook converts MI data to one-hot encoding for MistyR.
-- `/simmulated_ohe_conversion.ipynb`: This notebook converts the simulated data to one-hot encoding for MistyR. 
-=======
-/src: The script Tutorial_Misty_adapted.R Is used for the analysis of the just view for cell types. The script Misty_ct_Miguel.R was used by Miguel and adapted to my data, but is not creating values for auto-importances of cell types.
-
-/notebooks: Misty_SCNA_downstream.Rmd: Initial heatmap visualization of Misty's results
->>>>>>> origin/main
+- `/simulated_ohe_conversion.ipynb`: This notebook converts the simulated data to one-hot encoding for MistyR.
+- 
