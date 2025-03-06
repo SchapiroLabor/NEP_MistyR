@@ -45,4 +45,3 @@ Simulated data with x, y, and ct annotation columns is used. The script src/Tuto
 `/notebooks`:
 - `/MI_ohe_conversion.ipynb`: This notebook converts MI data to one-hot encoding for MistyR.
 - `/simulated_ohe_conversion.ipynb`: This notebook converts the simulated data to one-hot encoding for MistyR.
-- 
