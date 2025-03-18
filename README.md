@@ -13,24 +13,9 @@ The script src/Tutorial_Misty_adapted.R is adapted from the script the authors o
 ## Installation
 
 MistyR can be installed with: 
-- `BiocManager::install("mistyR")` (v 1.6.1)
+`BiocManager::install("mistyR")` (v 1.6.1)
 
-Other dependencies are 
-- pheatmap_1.0.12 
-- cowplot_1.1.1 
-- ggvoronoi_0.8.5
-- magrittr_2.0.3
-- forcats_1.0.0
-- stringr_1.5.0
-- readr_2.1.3
-- tidyr_1.3.0
-- tibble_3.1.8
-- ggplot2_3.4.0
-- tidyverse_1.3.2
-- distances_0.1.9
-- purrr_1.0.1
-- dplyr_1.1.0
-- future_1.31.0
+Other dependencies are specidied in `session_info.txt`.
 
 ## Data
 
