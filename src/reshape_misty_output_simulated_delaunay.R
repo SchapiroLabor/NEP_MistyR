@@ -1,6 +1,3 @@
-### Run Misty from github Fig2
-# https://github.com/saezlab/misty_pipelines/blob/master/insilico/structure_pipeline.R
-
 library(tidyverse)
 
 ### PATHS
@@ -58,4 +55,3 @@ write.csv(df,file=output_path,row.names = TRUE)
 pheatmap(df, treeheight_row = 0, treeheight_col = 0, show_rownames = FALSE)
 
 sessionInfo()
-

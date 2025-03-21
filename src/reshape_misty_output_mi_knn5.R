@@ -60,4 +60,3 @@ write.csv(df,file=output_path,row.names = TRUE)
 pheatmap(df, treeheight_row = 0, treeheight_col = 0, show_rownames = FALSE)
 
 sessionInfo()
-
